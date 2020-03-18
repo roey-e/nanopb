@@ -1,0 +1,27 @@
+load('//:utils.bzl', 'extract')
+
+genrule(
+  name = 'protos',
+  out = 'out',
+  srcs = ['simple.proto'],
+  cmd = 'mkdir -p $OUT && $(location //:generator)/generator/protoc -I=${SRCDIR} --plugin=protoc-gen-nanopb=$(location //:generator)/generator/protoc-gen-nanopb --nanopb_out=$OUT ${SRCDIR}/simple.proto',
+)
+
+cxx_library(
+  name = 'protos_o',
+  header_namespace = '',
+  exported_headers = {
+    'simple.pb.h': extract(':protos', 'simple.pb.h'),
+  },
+  srcs = [extract(':protos', 'simple.pb.c')],
+  deps = ['//:nanopb'],
+)
+
+cxx_binary(
+  name = 'simple', 
+  srcs = ['simple.c'],
+  deps = [':protos_o'],
+  visibility = [
+    'PUBLIC',
+  ],
+)

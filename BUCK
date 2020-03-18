@@ -1,5 +1,13 @@
 load('//:buckaroo_macros.bzl', 'buckaroo_deps')
 
+filegroup(
+  name = 'generator',
+  srcs = glob(['generator/**']),
+  visibility = [
+    'PUBLIC',
+  ],
+)
+
 cxx_library(
   name = 'nanopb',
   header_namespace = '',

@@ -1,26 +1,36 @@
+load('//:buckaroo_macros.bzl', 'buckaroo_cell')
 load('//:utils.bzl', 'extract')
 
+# The cell name of the Protobuf package
+protobuf_cell = buckaroo_cell('github.com/buckaroo-pm/protobuf')
+
+# The Buck target for protoc, the Protobuf compiler
+protoc = protobuf_cell + '//:protoc'
+
 genrule(
-  name = 'protos',
+  name = 'proto_srcs',
   out = 'out',
   srcs = ['simple.proto'],
-  cmd = 'mkdir -p $OUT && $(location //:generator)/generator/protoc -I=${SRCDIR} --plugin=protoc-gen-nanopb=$(location //:generator)/generator/protoc-gen-nanopb --nanopb_out=$OUT ${SRCDIR}/simple.proto',
+  cmd = 'mkdir -p $OUT && '
+        + '$(exe ' + protoc + ') '
+        + '-I=${SRCDIR} '
+        + '--plugin=protoc-gen-nanopb=$(location //:generator)/generator/protoc-gen-nanopb '
+        + '--nanopb_out=$OUT '
+        + '${SRCDIR}/simple.proto',
 )
 
 cxx_library(
-  name = 'protos_o',
+  name = 'proto',
   header_namespace = '',
-  exported_headers = {
-    'simple.pb.h': extract(':protos', 'simple.pb.h'),
-  },
-  srcs = [extract(':protos', 'simple.pb.c')],
+  exported_headers = [extract(':proto_srcs', 'simple.pb.h')],
+  srcs = [extract(':proto_srcs', 'simple.pb.c')],
   deps = ['//:nanopb'],
 )
 
 cxx_binary(
-  name = 'simple', 
+  name = 'simple',
   srcs = ['simple.c'],
-  deps = [':protos_o'],
+  deps = [':proto'],
   visibility = [
     'PUBLIC',
   ],

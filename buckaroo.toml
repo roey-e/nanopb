@@ -1,1 +1,5 @@
 targets = [ "//:nanopb" ]
+
+[[dependency]]
+package = "github.com/buckaroo-pm/protobuf"
+version = "branch=master"

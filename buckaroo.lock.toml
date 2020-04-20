@@ -1,2 +1,13 @@
-manifest = "393b6295df17649bb9465568028727ecdbc7cdcaf9ab9dbd2b1c6cf2f507ea97"
+manifest = "ae447f605bb6184d72cf70a68c3b1033e5c21cbe4e42670caf804e169d7e92e0"
 
+[[dependency]]
+package = "github.com/roey-e/protobuf"
+target = "//:protobuf"
+
+[lock."github.com/roey-e/protobuf"]
+versions = [ "branch=python-protobuf-buck" ]
+revision = "3e4ded46c76084d6f9f398b39753182c14a58969"
+
+[lock."github.com/roey-e/six"]
+versions = [ "branch=master" ]
+revision = "3be1cfc8f0f71c69d1a9547120a52aaab690012a"

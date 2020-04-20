@@ -1,0 +1,54 @@
+load('//:buckaroo_macros.bzl', 'buckaroo_cell')
+load('//:utils.bzl', 'extract', 'subdir_glob')
+
+# The cell name of the Protobuf package
+protobuf_cell = buckaroo_cell('github.com/roey-e/protobuf')
+
+# The Buck target for protoc, the Protobuf compiler
+protoc = protobuf_cell + '//:protoc'
+
+python_protobuf = protobuf_cell + '//python:protobuf'
+
+genrule(
+  name = 'nanopb_proto',
+  out = 'out',
+  srcs = glob(['**/*.proto']),
+  cmd = 'mkdir -p $OUT && '
+        + '$(exe ' + protoc + ') '
+        + '-I=${SRCDIR}/proto '
+        + '--python_out=$OUT '
+        + '${SRCDIR}/proto/nanopb.proto',
+  visibility = [
+    'PUBLIC',
+    ],
+)
+
+python_library(
+  name = 'nanopb_proto_lib',
+  srcs = [extract(':nanopb_proto', 'nanopb_pb2.py')],
+  base_module = 'generator/proto',
+)
+    
+python_library(
+  name = 'nanopb_generator_lib',
+  srcs = glob(['**/*.py']),
+  deps = [':nanopb_proto_lib',]
+)
+
+python_binary(
+  name = 'nanopb_generator',
+  main_module = 'generator.nanopb_generator',
+  deps = [':nanopb_generator_lib', python_protobuf],
+)
+
+genrule(
+  name = 'protoc-gen-nanopb',
+  out = 'protoc-gen-nanopb',
+  cmd  = 'touch $OUT; '
+         + 'chmod u+x $OUT; '
+         + 'echo -e \'#!/bin/sh\\nexec $(exe :nanopb_generator) --protoc-plugin\' >> $OUT',
+  executable = True,
+  visibility = [
+    'PUBLIC',
+  ],
+)

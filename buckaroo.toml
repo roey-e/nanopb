@@ -1,1 +1,5 @@
 targets = [ "//:nanopb" ]
+
+[[dependency]]
+package = "github.com/roey-e/protobuf"
+version = "branch=python-protobuf-buck"

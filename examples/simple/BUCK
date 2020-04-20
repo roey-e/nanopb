@@ -1,0 +1,39 @@
+load('//:buckaroo_macros.bzl', 'buckaroo_cell')
+load('//:utils.bzl', 'extract')
+
+# The cell name of the Protobuf package
+protobuf_cell = buckaroo_cell('github.com/roey-e/protobuf')
+
+# The Buck target for protoc, the Protobuf compiler
+protoc = protobuf_cell + '//:protoc'
+
+genrule(
+  name = 'proto_srcs',
+  out = 'out',
+  srcs = ['simple.proto'],
+  cmd = (
+    'mkdir -p $OUT && '
+    + '$(exe ' + protoc[0:] + ') '
+    + '-I=${SRCDIR} '
+    + '--plugin=protoc-gen-nanopb=$(exe //generator:protoc-gen-nanopb) '
+    + '--nanopb_out=$OUT '
+    + '${SRCDIR}/simple.proto'
+  ),
+)
+
+cxx_library(
+  name = 'proto',
+  header_namespace = '',
+  exported_headers = [extract(':proto_srcs', 'simple.pb.h')],
+  srcs = [extract(':proto_srcs', 'simple.pb.c')],
+  deps = ['//:nanopb'],
+)
+
+cxx_binary(
+  name = 'simple',
+  srcs = ['simple.c'],
+  deps = [':proto'],
+  visibility = [
+    'PUBLIC',
+  ],
+)

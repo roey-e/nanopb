@@ -46,7 +46,7 @@ genrule(
   out = 'protoc-gen-nanopb',
   cmd  = 'touch $OUT; '
          + 'chmod u+x $OUT; '
-         + 'echo -e \'#!/bin/sh\nexec $(exe :nanopb_generator) --protoc-plugin\' >> $OUT',
+         + 'echo -e \'#!/bin/sh\\nexec $(exe :nanopb_generator) --protoc-plugin\' >> $OUT',
   executable = True,
   visibility = [
     'PUBLIC',
